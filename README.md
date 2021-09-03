@@ -71,6 +71,7 @@ The recommended Integrated Development Environment (IDE) is IntelliJ IDEA.
 
 ## :busts_in_silhouette: Team
 
-                                  | [![Bruno][bruno-pic]][bruno] |
-                                  | :--------------------------: |
-                                  |    [Bruno Santos][bruno]     |
+| [![Bruno][bruno-pic]][bruno] | 
+| :--------------------------: | 
+|    [Bruno Santos][bruno]     |  
+
