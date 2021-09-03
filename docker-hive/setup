@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+
+# Upload datafiles
+docker exec docker-hive_namenode_1 bash -c "curl https://www.dropbox.com/s/1v3wtj85rhthrp8/googleplaystore.csv\?dl\=0 -J -L -k | hdfs dfs -put - /Challenge/googleplaystore/googleplaystore.csv"
+
+docker exec docker-hive_namenode_1 bash -c "curl https://www.dropbox.com/s/4ahfp54883l40i1/googleplaystore_user_reviews.csv?dl=0 -J -L -k | hdfs dfs -put - /Challenge/googleplaystore_user_reviews/googleplaystore_user_reviews.csv"
+
+
+# List HDFS
+docker exec docker-hive_namenode_1 bash -c "hdfs dfs -ls /"
+
+docker exec docker-hive_namenode_1 bash -c "hdfs dfs -ls /Challenge"
+
+
+# Create tables
+
+BASE_PATH='hdfs://'
+
+
+#################################### googleplaystore
+docker exec docker-hive_hive-server_1 beeline -u jdbc:hive2://localhost:10000 -e "
+    create external table googleplaystore(
+        App string,
+        Category string,
+        Rating float,
+        Reviews integer,
+        Size string,
+        Installs string,
+        Type string,
+        Price string,
+        ContentRating string,
+        Genres array<string>,
+        LastUpdated string,
+        CurrentVer string,
+        AndroidVer string)
+        row format delimited
+        fields terminated by ','
+        collection items terminated by ';'
+        lines terminated by '\n'
+        stored as textfile
+        location '$BASE_PATH/Challenge/googleplaystore'
+        tblproperties (\"skip.header.line.count\"=\"1\");
+"
+
+docker exec docker-hive_hive-server_1 beeline -u jdbc:hive2://localhost:10000 -e "
+    create table googleplaystore_pq(
+        App string,
+        Category string,
+        Rating float,
+        Reviews integer,
+        Size string,
+        Installs string,
+        Type string,
+        Price integer,
+        ContentRating string,
+        Genres array<string>,
+        LastUpdated string,
+        CurrentVer string,
+        AndroidVer string)
+        stored as parquet;
+"
+
+docker exec docker-hive_hive-server_1 beeline -u jdbc:hive2://localhost:10000 -e "
+    insert overwrite table googleplaystore_pq select * from googleplaystore;
+"
+
+############################# googleplaystore_user_reviews
+docker exec docker-hive_hive-server_1 beeline -u jdbc:hive2://localhost:10000 -e "
+    create external table googleplaystore_user_reviews(
+        App string,
+        Translated_Review string,
+        Sentiment string,
+        Sentiment_Polarity string,
+        Sentiment_Subjectivity string)
+        row format delimited
+        fields terminated by ','
+        collection items terminated by ';'
+        lines terminated by '\n'
+        stored as textfile
+        location '$BASE_PATH/Challenge/googleplaystore_user_reviews'
+        tblproperties (\"skip.header.line.count\"=\"1\");
+"
+
+docker exec docker-hive_hive-server_1 beeline -u jdbc:hive2://localhost:10000 -e "
+    create table googleplaystore_user_reviews_pq(
+        App string,
+        Translated_Review string,
+        Sentiment string,
+        Sentiment_Polarity string,
+        Sentiment_Subjectivity string)
+        stored as parquet;
+"
+
+
+docker exec docker-hive_hive-server_1 beeline -u jdbc:hive2://localhost:10000 -e "
+    insert overwrite table googleplaystore_user_reviews_pq select * from googleplaystore_user_reviews;
+"
+
+
+########################### googleplaystore_cleaned 
+########################### Exercise 4
+
+docker exec docker-hive_hive-server_1 beeline -u jdbc:hive2://localhost:10000 -e "
+    create external table googleplaystore_cleaned(
+        App string,
+        Categories array<string>,
+        Rating float,
+        Reviews integer,
+        Size string,
+        Installs string,
+        Type integer,
+        Price string,
+        Content_Rating string,
+        Genres array<string>,
+        Last_Updated string,
+        Current_Version string,
+        Minimum_Android_Version string,
+        Average_Sentiment_Polarity string)
+        row format delimited
+        fields terminated by ','
+        collection items terminated by ';'
+        lines terminated by '\n'
+        stored as textfile
+        location '$BASE_PATH/Challenge/googleplaystore_cleaned'
+        tblproperties (\"skip.header.line.count\"=\"1\");
+"
+
+docker exec docker-hive_hive-server_1 beeline -u jdbc:hive2://localhost:10000 -e "
+    create table googleplaystore_cleaned_pq(
+        App string,
+        Categories array<string>,
+        Rating float,
+        Reviews integer,
+        Size string,
+        Installs string,
+        Type integer,
+        Price string,
+        Content_Rating string,
+        Genres array<string>,
+        Last_Updated string,
+        Current_Version string,
+        Minimum_Android_Version string,
+        Average_Sentiment_Polarity string)
+        stored as parquet;
+"
