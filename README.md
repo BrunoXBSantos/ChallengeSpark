@@ -52,6 +52,14 @@ Run the project.
 ```
 bin/run --docker <query>
 ```
+Examples:
+  ```
+bin/run --docker part1
+``````
+bin/run --docker part2
+``````
+bin/run --docker part3
+```
 
 Format the code accordingly to common [guide lines](https://github.com/google/google-java-format).
 
